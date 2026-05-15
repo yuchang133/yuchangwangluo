@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌟 俞昌网络 · 视频开场 · 温馨寄语</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', '微软雅黑', 'Microsoft YaHei', 'PingFang SC', system-ui, sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #fdcbf1 0%, #e6dee9 50%, #a1c4fd 100%);
+            background-attachment: fixed;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding-top: 140px;
+            position: relative;
+            cursor: default;
+            user-select: none;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: radial-gradient(circle at 20% 30%, rgba(255,255,255,0.3) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 70%, rgba(255,240,245,0.4) 0%, transparent 60%);
+            pointer-events: none; z-index: 0;
+        }
+
+        /* 视频开场层 */
+        #videoSplash {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 9999; background: #000;
+            transition: opacity 0.8s ease; opacity: 1; pointer-events: all;
+        }
+        #videoSplash video {
+            width: 100%; height: 100%; object-fit: cover;
+        }
+        #videoSplash.fade-out {
+            opacity: 0; pointer-events: none;
+        }
+
+        /* 交互引导层（点击开启声音） */
+        .interact-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.3); backdrop-filter: blur(4px);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 10; cursor: pointer; transition: opacity 0.5s;
+        }
+        .interact-overlay.hidden {
+            opacity: 0; pointer-events: none;
+        }
+        .interact-text {
+            color: white; font-size: 28px; font-weight: bold;
+            letter-spacing: 4px; text-shadow: 0 0 20px rgba(0,200,255,0.8);
+            margin-bottom: 15px;
+        }
+        .interact-icon {
+            font-size: 60px; color: white; filter: drop-shadow(0 0 20px #00e5ff);
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* 跳过按钮 */
+        .skip-btn {
+            position: absolute; bottom: 30px; right: 30px;
+            background: rgba(255,255,255,0.15); backdrop-filter: blur(10px);
+            color: white; border: 1px solid rgba(255,255,255,0.4);
+            padding: 10px 25px; border-radius: 50px;
+            font-size: 16px; cursor: pointer; z-index: 20;
+            transition: 0.3s; letter-spacing: 2px;
+        }
+        .skip-btn:hover { background: rgba(255,255,255,0.35); }
+
+        /* 主页面样式 (保持不变) */
+        .header {
+            position: fixed; top: 0; left: 0; width: 100%;
+            background: rgba(255,255,255,0.75); backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.05);
+            padding: 16px 20px; z-index: 1000;
+            display: flex; flex-direction: column; align-items: center; gap: 8px;
+            border-bottom: 1px solid rgba(255,255,255,0.8);
+        }
+        .header h1 {
+            font-size: 2.2rem; font-weight: 700;
+            background: linear-gradient(135deg, #ff758c, #ff7eb3, #a18cd1);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text; letter-spacing: 4px; margin: 0;
+        }
+        .subtitle { font-size: 0.95rem; color: #7f6e7c; letter-spacing: 2px; }
+        .button-group { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; align-items: center; }
+        .btn {
+            padding: 10px 24px; border-radius: 50px; border: none;
+            font-size: 0.95rem; font-weight: 600; letter-spacing: 2px; cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.25,0.8,0.25,1.2);
+            background: white; color: #4a4a4a; box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+            display: inline-flex; align-items: center; gap: 6px;
+            backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.7);
+            position: relative; overflow: hidden;
+        }
+        .btn::after { content: ''; position: absolute; top: 50%; left: 50%; width: 0; height: 0; border-radius: 50%; background: rgba(255,255,255,0.4); transform: translate(-50%,-50%); transition: width 0.6s, height 0.6s; }
+        .btn:hover::after { width: 300px; height: 300px; }
+        .btn-primary { background: linear-gradient(135deg, #ff9a9e, #fad0c4); color: white; border: none; box-shadow: 0 8px 25px rgba(255,154,158,0.4); }
+        .btn-outline { background: rgba(255,255,255,0.65); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.9); color: #555; }
+        .speed-control { display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.6); backdrop-filter: blur(12px); padding: 6px 15px; border-radius: 40px; font-size: 0.9rem; color: #555; }
+        .speed-control label { font-weight: 600; letter-spacing: 1px; }
+        .speed-control input[type=range] { width: 100px; accent-color: #ff758c; }
+        .speed-value { min-width: 45px; text-align: center; font-weight: 700; color: #ff758c; }
+
+        #cardsContainer { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 100; }
+        .warm-card {
+            position: absolute; width: 250px; min-height: 70px; padding: 15px 12px;
+            border-radius: 24px; background: rgba(255,255,255,0.8); backdrop-filter: blur(12px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.08); display: flex; align-items: center; justify-content: center;
+            text-align: center; font-size: 1rem; font-weight: 600; color: #3e3e3e; letter-spacing: 1px;
+            pointer-events: auto; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
+            animation: cardPop 0.4s cubic-bezier(0.175,0.885,0.32,1.275) forwards;
+            border: 1px solid rgba(255,255,255,0.9); z-index: 200;
+        }
+        @keyframes cardPop {
+            0% { transform: scale(0) rotate(-5deg); opacity: 0; }
+            60% { transform: scale(1.08) rotate(1deg); opacity: 1; }
+            100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+        .card-close { position: absolute; top: 8px; right: 12px; width: 22px; height: 22px; border-radius: 50%; background: rgba(0,0,0,0.05); color: #888; font-size: 16px; text-align: center; cursor: pointer; opacity: 0; pointer-events: none; }
+        .warm-card:hover .card-close { opacity: 1; pointer-events: auto; }
+        .counter-badge { position: fixed; bottom: 25px; right: 25px; background: rgba(255,255,255,0.75); backdrop-filter: blur(15px); padding: 10px 22px; border-radius: 40px; font-weight: 600; color: #555; z-index: 1500; }
+    </style>
+</head>
+<body>
+    <!-- 视频开场层 -->
+    <div id="videoSplash">
+        <!-- 移除 muted，允许声音自动播放，但需用户交互引导 -->
+        <video id="introVideo" src="yuchang.mp4" autoplay playsinline preload="auto"></video>
+
+        <!-- 点击开启声音引导层 -->
+        <div id="interactOverlay" class="interact-overlay">
+            <div class="interact-icon">🔊</div>
+            <div class="interact-text">点击屏幕开启声音</div>
+        </div>
+
+        <button class="skip-btn" id="skipBtn">跳过 ▸</button>
+    </div>
+
+    <!-- 主页面内容 -->
+    <div id="mainContent" style="opacity:0; transition: opacity 0.6s ease;">
+        <div class="header">
+            <h1>✨ 温馨寄语 ✨</h1>
+            <p class="subtitle">满屏温暖 · 为你而来</p>
+            <div class="button-group">
+                <button id="startBtn" class="btn btn-primary">💖 接收温馨</button>
+                <button id="clearBtn" class="btn btn-outline" style="display: none;">🌿 清空卡片</button>
+            </div>
+            <div class="speed-control">
+                <label>⚡ 速度</label>
+                <input type="range" id="speedSlider" min="1" max="200" value="12" step="1">
+                <span class="speed-value" id="speedDisplay">12ms</span>
+            </div>
+        </div>
+        <div id="cardsContainer"></div>
+        <div id="counter" class="counter-badge">🌸 0 / 300</div>
+    </div>
+
+    <script>
+        (function() {
+            // ---------- 视频开场声音优化 ----------
+            const videoSplash = document.getElementById('videoSplash');
+            const introVideo = document.getElementById('introVideo');
+            const mainContent = document.getElementById('mainContent');
+            const interactOverlay = document.getElementById('interactOverlay');
+            const skipBtn = document.getElementById('skipBtn');
+
+            let splashEnded = false;
+            let userInteracted = false; // 是否通过用户交互启动
+
+            // 尝试自动播放（可能失败，静默处理）
+            async function attemptAutoplay() {
+                try {
+                    await introVideo.play();
+                    // 自动播放成功（可能无声，因为 muted 已移除，但浏览器仍可能阻止有声播放）
+                    // 如果成功且已有声音，隐藏引导层
+                    if (!introVideo.muted) {
+                        interactOverlay.classList.add('hidden');
+                    }
+                } catch (err) {
+                    // 自动播放被阻止，显示引导层
+                    console.log('自动播放被阻止，等待用户交互');
+                    interactOverlay.classList.remove('hidden');
+                }
+            }
+
+            // 用户点击引导层或视频区域：开启声音并播放
+            function enableSoundAndPlay() {
+                if (userInteracted) return;
+                userInteracted = true;
+                // 确保静音已移除
+                introVideo.muted = false;
+                introVideo.play().then(() => {
+                    interactOverlay.classList.add('hidden');
+                }).catch(err => {
+                    console.warn('播放失败:', err);
+                });
+            }
+
+            // 结束开场动画
+            function endSplash() {
+                if (splashEnded) return;
+                splashEnded = true;
+                videoSplash.classList.add('fade-out');
+                mainContent.style.opacity = '1';
+                videoSplash.addEventListener('transitionend', function handler() {
+                    videoSplash.removeEventListener('transitionend', handler);
+                    if (videoSplash.parentNode) videoSplash.parentNode.removeChild(videoSplash);
+                });
+                setTimeout(() => {
+                    if (videoSplash.parentNode) videoSplash.parentNode.removeChild(videoSplash);
+                }, 900);
+            }
+
+            // 视频正常结束
+            introVideo.addEventListener('ended', endSplash);
+
+            // 视频加载错误处理
+            introVideo.addEventListener('error', () => {
+                console.error('视频加载失败');
+                interactOverlay.innerHTML = '<div class="interact-text">⚠️ 视频加载失败，点击跳过</div>';
+                interactOverlay.classList.remove('hidden');
+                interactOverlay.addEventListener('click', endSplash);
+            });
+
+            // 点击引导层：启动声音并播放
+            interactOverlay.addEventListener('click', (e) => {
+                e.stopPropagation();
+                enableSoundAndPlay();
+            });
+
+            // 点击视频区域也可以启动声音（如果还没有交互）
+            videoSplash.addEventListener('click', (e) => {
+                if (e.target === skipBtn) return;
+                if (!userInteracted) {
+                    enableSoundAndPlay();
+                }
+            });
+
+            // 跳过按钮
+            skipBtn.addEventListener('click', () => {
+                endSplash();
+            });
+
+            // 如果自动播放成功但用户未交互，也可以隐藏引导层
+            introVideo.addEventListener('play', () => {
+                if (!userInteracted && !introVideo.muted) {
+                    interactOverlay.classList.add('hidden');
+                }
+            });
+
+            // 启动自动播放尝试
+            attemptAutoplay();
+
+            // 兜底：10秒后强制结束
+            setTimeout(() => {
+                if (!splashEnded) endSplash();
+            }, 10000);
+
+            // ---------- 温馨卡片逻辑 ----------
+            const tips = [
+                '多喝水哦~','保持微笑呀','每天都要元气满满','记得吃水果','保持好心情','好好爱自己','我想你了',
+                '梦想成真','期待下一次见面','金榜题名','顺顺利利','早点休息','愿所有烦恼都消失',
+                '别熬夜','今天过得开心嘛','天冷了，多穿衣服','你值得被爱','做自己的太阳','好运正在派送中',
+                '一切都会好起来的','今天也是美好的一天','记得按时吃饭','你是最棒的','拥抱快乐','幸运常伴'
+            ];
+            const bgColors = [
+                '#FFB6C1','#87CEEB','#90EE90','#E6E6FA','#FFFACD','#DDA0DD','#FF7F50','#FFE4C4',
+                '#7FFFD4','#FFE4E1','#F0FFF0','#FFF0F5','#FDF5E6','#F8BBD0','#B3E5FC','#C8E6C9',
+                '#FFE082','#FFCCBC','#D1C4E9','#DCEDC8'
+            ];
+
+            const container = document.getElementById('cardsContainer');
+            const startBtn = document.getElementById('startBtn');
+            const clearBtn = document.getElementById('clearBtn');
+            const counterDiv = document.getElementById('counter');
+            const speedSlider = document.getElementById('speedSlider');
+            const speedDisplay = document.getElementById('speedDisplay');
+
+            let cards = [], isGenerating = false, timer = null;
+            const totalCards = 300;
+            let currentSpeed = parseInt(speedSlider.value);
+
+            speedSlider.addEventListener('input', (e) => {
+                currentSpeed = parseInt(e.target.value);
+                speedDisplay.textContent = currentSpeed + 'ms';
+            });
+
+            function randomInt(min, max) { return Math.floor(Math.random()*(max-min+1))+min; }
+            function createCard() {
+                const tip = tips[Math.floor(Math.random()*tips.length)];
+                const bg = bgColors[Math.floor(Math.random()*bgColors.length)];
+                const cardWidth = window.innerWidth < 600 ? 180 : 250;
+                const headerH = document.querySelector('.header').offsetHeight;
+                const x = randomInt(0, Math.max(0, window.innerWidth-cardWidth));
+                const y = randomInt(headerH+15, Math.max(headerH+15, window.innerHeight-80));
+                const card = document.createElement('div');
+                card.className='warm-card';
+                card.textContent=tip;
+                card.style.left=x+'px';
+                card.style.top=y+'px';
+                card.style.backgroundColor=bg;
+                const close=document.createElement('span');
+                close.className='card-close';
+                close.innerHTML='&times;';
+                close.onclick=e=>{e.stopPropagation();removeCard(card);};
+                card.appendChild(close);
+                card.onclick=e=>{if(e.target!==close)removeCard(card);};
+                container.appendChild(card);
+                cards.push(card);
+                updateCounter();
+            }
+            function removeCard(card) {
+                if(!card||!card.parentNode)return;
+                card.style.transition='all 0.3s';
+                card.style.transform='scale(0.5)';
+                card.style.opacity='0';
+                card.style.pointerEvents='none';
+                card.addEventListener('transitionend', function h(){
+                    card.removeEventListener('transitionend',h);
+                    if(card.parentNode)card.parentNode.removeChild(card);
+                    const i=cards.indexOf(card);
+                    if(i>-1)cards.splice(i,1);
+                    updateCounter();
+                });
+                setTimeout(()=>{
+                    if(card.parentNode){
+                        card.parentNode.removeChild(card);
+                        const i=cards.indexOf(card);
+                        if(i>-1)cards.splice(i,1);
+                        updateCounter();
+                    }
+                },350);
+            }
+            function clearAll(){
+                stopGen();
+                cards.forEach(c=>c.parentNode&&c.parentNode.removeChild(c));
+                cards=[];updateCounter();
+                clearBtn.style.display='none';
+            }
+            function stopGen(){
+                if(timer){clearTimeout(timer);timer=null;}
+                isGenerating=false;
+                startBtn.disabled=false;
+                startBtn.style.opacity='1';
+            }
+            function startGen(){
+                if(isGenerating)return;
+                clearAll();
+                isGenerating=true;
+                startBtn.disabled=true;
+                startBtn.style.opacity='0.7';
+                clearBtn.style.display='inline-flex';
+                function next(){
+                    if(!isGenerating)return;
+                    if(cards.length>=totalCards){stopGen();startBtn.disabled=false;startBtn.style.opacity='1';return;}
+                    createCard();
+                    timer=setTimeout(next,currentSpeed);
+                }
+                next();
+            }
+            function updateCounter(){ counterDiv.textContent=`🌸 ${cards.length} / ${totalCards}`; }
+
+            startBtn.onclick=startGen;
+            clearBtn.onclick=()=>{clearAll();startBtn.disabled=false;startBtn.style.opacity='1';};
+        })();
+    </script>
+</body>
+</html>
